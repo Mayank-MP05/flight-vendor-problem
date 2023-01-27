@@ -1,4 +1,4 @@
-export const getFlights = async (req, res) => {
+const getFlights = async (req, res) => {
     try {
         const flights = await Flight.find()
         res.status(200).json(flights)
@@ -6,3 +6,5 @@ export const getFlights = async (req, res) => {
         res.status(404).json({ message: error.message })
     }
 }
+
+module.exports = { getFlights }
