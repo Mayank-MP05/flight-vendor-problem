@@ -2,7 +2,7 @@ const vendorsDB = require("../database/vendors.model")
 
 const getVendors = async (req, res, next) => {
     console.log("getVendors: ");
-    const thresholdAPILatency = 1500;
+    const thresholdAPILatency = 4000;
 
     try {
         // DOCS: STEP 1: Prepare Vendor API Promises to fetch data from all vendors only execute if latency is less than threshold

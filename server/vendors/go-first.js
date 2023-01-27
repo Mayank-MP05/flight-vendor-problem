@@ -4,6 +4,10 @@ const GO_FIRST_FLIGHTS = [
         flightPrice: 4000,
     },
     {
+        type: 'ECONOMY',
+        flightPrice: 1800,
+    },
+    {
         type: 'BUSINESS',
         flightPrice: 12000,
     },

@@ -1,6 +1,14 @@
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+/**
+ * Function to delay execution of js function by delayed ms sec
+ * @param {*} delayInMs 
+ * @param {*} fn 
+ * @param  {...any} args 
+ * @returns 
+ */
 async function sleep(delayInMs = 3000, fn, ...args) {
     await timeout(delayInMs);
     return fn(...args);
