@@ -47,5 +47,6 @@ const getRandomInt = (min, max) => {
 module.exports = {
     sleep,
     timeout,
-    insertVendorNameInFlightsObj
+    insertVendorNameInFlightsObj,
+    getRandomInt
 }
