@@ -7,3 +7,7 @@ Get the list of leads sort based on the price sorting
 1. Get Flights API response time
 2. MMT Vendors threshold API latency
 3. Vendor wise API latency
+
+### Outputs
+
+1. Get the list of flights sorted based on pricing 
