@@ -7,7 +7,7 @@ app.get('/', (req, res) => {
     res.send('Hello Boiii, Welcome to Flights World!')
 })
 
-app.post('/get-flights', getVendors)
+app.get('/get-flights', getVendors)
 
 
 app.listen(PORT, () => {
