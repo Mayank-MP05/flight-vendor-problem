@@ -4,4 +4,3 @@ export const AIR_ASIA_FLIGHTS = [
         flightPrice: 4000,
     }
 ]
-
