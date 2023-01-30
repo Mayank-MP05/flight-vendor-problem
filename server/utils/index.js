@@ -25,19 +25,22 @@ async function sleep(delayInMs = 3000, fn, ...args) {
 const insertVendorNameInFlightsObj = (vendorObj) => {
     // DOCS: Get Random Id
     const flightId = uuid();
+    const randomLatency = getRandomInt(0, 1000);
 
     // DOCS: Get Random Booking Link
     const airlineLinksArrLen = airlineBookingLinksArr.length - 1;
     const getRandomBookingLink = airlineBookingLinksArr[getRandomInt(0, airlineLinksArrLen)]
-    return {
-        ...vendorObj, flightsArr: vendorObj.flightsArr.map(singleFlightObj => ({
+    return ({
+        ...vendorObj,
+        vendorLatency: randomLatency,
+        flightsArr: vendorObj.flightsArr.map(singleFlightObj => ({
             ...singleFlightObj,
             airlinesName: vendorObj.vendorName,
-            airlineAPILatency: vendorObj.vendorLatency,
+            airlineAPILatency: randomLatency,
             flightId: flightId,
             bookingLink: `https://www.${getRandomBookingLink}/flightId=${flightId}`
         }))
-    }
+    })
 }
 
 const getRandomInt = (min, max) => {

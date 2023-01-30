@@ -3,7 +3,7 @@ const { getRandomInt } = require("../utils");
 
 const getVendors = async (req, res, next) => {
     console.log("getVendors: ");
-    const thresholdAPILatency = 4000;
+    const thresholdAPILatency = 5000;
     let i = 0;
     const startTimer = new Date().getTime();
 
@@ -23,19 +23,21 @@ const getVendors = async (req, res, next) => {
 
         const vendorResponseBoolArr = getVendorsFlightsPromisesArr.map(singleVendor => false)
 
-        // DOCS: STEP 2: Execute all promises in parallel
-        const vendorsFlightData = await Promise.all(getVendorsFlightsPromisesArr)
+        // const vendorsFlightData = await Promise.all(getVendorsFlightsPromisesArr)
 
+        const flattenedVendorsFlightData = []
 
         const checkRecursive = () => {
-            console.log(`vendorResponseBoolArr @${i}s: `, vendorResponseBoolArr);
-            vendorsFlightData.forEach((singleVendor, idx) => {
+            // DOCS: STEP 2: Execute all promises in parallel
+            // console.log(`vendorResponseBoolArr @${i}s: `, vendorResponseBoolArr);
+            getVendorsFlightsPromisesArr.forEach((singleVendorPromise, idx) => {
                 try {
-                    singleVendor.then((data) => {
-                        console.log("vendorsFlightData PROMISE DATA: ", data);
+                    singleVendorPromise.then((data) => {
+                        // console.log("vendorsFlightData PROMISE DATA: ", data);
                         vendorResponseBoolArr[idx] = true;
+                        flattenedVendorsFlightData.push(...data)
                     }).catch((error) => {
-                        console.log("vendorsFlightData PROMISE ERROR: ", error);
+                        // console.log("vendorsFlightData PROMISE ERROR: ", error);
                     })
                 } catch (error) {
                     console.log("vendorsFlightData PROMISE ERROR: ", error);
@@ -43,28 +45,23 @@ const getVendors = async (req, res, next) => {
             })
         }
 
+        checkRecursive();
+
+        // DOCS: STEP 3: Flatten the array coming from all vendors within threshold latency
         setTimeout(() => {
-            checkRecursive();
+            // DOCS: STEP 4: Sort the outputs based on price and return
+            flattenedVendorsFlightData.sort((flightOne, flightTwo) => {
+                return flightOne.flightPrice - flightTwo.flightPrice
+            })
+
+            // DOCS: STEP 5: Print total time taken by the API
+            const endTimer = new Date().getTime();
+            const timeTaken = endTimer - startTimer;
+            console.log("timeTaken : ", timeTaken);
+
+            // DOCS: STEP 6: Return the sorted data
+            res.status(200).json({ vendors: flattenedVendorsFlightData })
         }, thresholdAPILatency);
-
-        // DOCS: STEP 3: Flatten the array coming from all vendors
-        const flattenedVendorsFlightData = []
-        vendorsFlightData.forEach(singleVendorFlights => {
-            flattenedVendorsFlightData.push(...singleVendorFlights)
-        })
-
-        // DOCS: STEP 4: Sort the outputs based on price and return
-        flattenedVendorsFlightData.sort((flightOne, flightTwo) => {
-            return flightOne.flightPrice - flightTwo.flightPrice
-        })
-
-        // DOCS: STEP : Stop the timer
-        const endTimer = new Date().getTime();
-        const timeTaken = endTimer - startTimer;
-        console.log("timeTaken : ", timeTaken);
-
-        // DOCS: STEP 5: Return the sorted data
-        res.status(200).json({ vendors: flattenedVendorsFlightData })
     } catch (error) {
         res.status(404).json({ message: error.message })
     }

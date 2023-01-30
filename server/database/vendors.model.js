@@ -33,5 +33,5 @@ let vendorsDB = [
     }
 ]
 vendorsDB = vendorsDB.map(vendor => insertVendorNameInFlightsObj(vendor))
-
+console.log("vendorsDB: ", vendorsDB);
 module.exports = vendorsDB
