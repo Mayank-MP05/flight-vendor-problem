@@ -22,7 +22,7 @@ async function sleep(delayInMs = 3000, fn, ...args) {
  * @param {object} vendorObj 
  * @returns 
  */
-const insertVendorNameInFlightsObj = (vendorObj) => {
+const transformVendorObjAndFlights = (vendorObj) => {
     // DOCS: Get Random Id
     const flightId = uuid();
     const randomLatency = getRandomInt(0, 1000);
@@ -50,6 +50,6 @@ const getRandomInt = (min, max) => {
 module.exports = {
     sleep,
     timeout,
-    insertVendorNameInFlightsObj,
+    insertVendorNameInFlightsObj: transformVendorObjAndFlights,
     getRandomInt
 }
