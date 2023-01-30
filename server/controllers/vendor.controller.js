@@ -1,15 +1,20 @@
-const vendorsDB = require("../database/vendors.model");
+let vendorsDB = require("../database/vendors.model");
 const { getRandomInt } = require("../utils");
-const { printVendorWiseLatency, printLine } = require("../utils/print-vendor-wise-latency");
+const { printVendorWiseLatency, printLine, printNewRequest } = require("../utils/print-vendor-wise-latency");
+const { randomizeVendorLatency } = require("../utils/randomize-latency");
 
 const getVendors = async (req, res, next) => {
     const thresholdAPILatency = 500;
     let thresholdAPILatencyReached = false;
-    console.log('***************************************************')
+    printNewRequest();
     console.log("GET /get-flights @", new Date().toLocaleTimeString());
 
     console.log(`- Threshold API Latency : ${thresholdAPILatency}ms`)
     const startTimer = new Date().getTime();
+
+    // DOCS: STEP 0: Randomize latency for all vendors
+    vendorsDB = randomizeVendorLatency(vendorsDB);
+
     printLine();
     printVendorWiseLatency(vendorsDB);
     printLine();
@@ -46,7 +51,7 @@ const getVendors = async (req, res, next) => {
                         console.log("-> Kill promise ", vendorData[0].airlinesName);
                         return reject(new Error('** Server timeout at Query level'));
                     }
-                    console.log("-> Single Vendor Response from: ", vendorData[0].airlinesName + ` @${new Date().toLocaleTimeString()}` + " with latency " + vendorData[0].airlineAPILatency + "ms");
+                    console.log("-> Single Vendor Response from: ", vendorData[0].airlinesName + ` @${new Date().toLocaleTimeString()}` + " || latency " + vendorData[0].airlineAPILatency + "ms");
                     vendorResponseBoolArr[idx] = true;
                     // DOCS: STEP 3: Flatten the array coming from all vendors within threshold latency
                     flattenedVendorsFlightData.push(...vendorData)

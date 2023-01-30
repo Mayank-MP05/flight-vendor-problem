@@ -9,4 +9,7 @@ const printLine = () => {
     console.log('-------------------------------------');
 }
 
-module.exports = { printVendorWiseLatency, printLine }
+const printNewRequest = () => {
+    console.log('\n\n\n#########################################################');
+}
+module.exports = { printVendorWiseLatency, printLine, printNewRequest }
