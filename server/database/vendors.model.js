@@ -6,7 +6,7 @@ const { SPICEJET_FLIGHTS } = require("../vendors/spicejet")
 const { VISTARA_FLIGHTS } = require("../vendors/vistara")
 const { sleep, transformVendorObjAndFlights } = require("../utils")
 
-let vendorsDB = [
+let     vendorsDB = [
     {
         vendorName: "AIR_ASIA",
         vendorLatency: 1000,

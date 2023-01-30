@@ -1,9 +1,9 @@
 let vendorsDB = require("../database/vendors.model");
-const { getRandomInt } = require("../utils");
+const { getRandomInt, transformVendorObjAndFlights } = require("../utils");
 const { printVendorWiseLatency, printLine, printNewRequest } = require("../utils/print-vendor-wise-latency");
 const { randomizeVendorLatency } = require("../utils/randomize-latency");
 
-const getVendors = async (req, res, next) => {
+const getAllFlightsFromVendors = async (req, res, next) => {
     const thresholdAPILatency = 500;
     let thresholdAPILatencyReached = false;
     printNewRequest();
@@ -12,7 +12,9 @@ const getVendors = async (req, res, next) => {
     console.log(`- Threshold API Latency : ${thresholdAPILatency}ms`)
     const startTimer = new Date().getTime();
 
-    // DOCS: STEP 0: Randomize latency for all vendors
+    console.log("[INFO] Randomize DB latency ...");
+    // DOCS: STEP 0: Prepare DB with random latency and booking links
+    vendorsDB = vendorsDB.map(vendor => transformVendorObjAndFlights(vendor))
     vendorsDB = randomizeVendorLatency(vendorsDB);
 
     printLine();
@@ -24,15 +26,12 @@ const getVendors = async (req, res, next) => {
 
         // DOCS: STEP 1: Prepare Vendor API Promises to fetch data from all vendors only execute if latency is less than threshold
         let getVendorsFlightsPromisesArr = vendorsDB.map(singleVendor => {
-            return getSingleVendorFlights({
-                vendorName: singleVendor.vendorName,
-                vendorLatency: singleVendor.vendorLatency
-            })
+            return getSingleVendorFlights(
+                singleVendor.vendorName,
+                singleVendor.vendorLatency
+            )
         })
         printLine();
-
-        // DOCS: Remove nulls and undefined for non-eligible vendors
-        getVendorsFlightsPromisesArr = getVendorsFlightsPromisesArr.filter(singleVendor => singleVendor != undefined)
 
         const vendorResponseBoolArr = getVendorsFlightsPromisesArr.map(singleVendor => false)
 
@@ -46,12 +45,15 @@ const getVendors = async (req, res, next) => {
          */
         getVendorsFlightsPromisesArr.forEach((singleVendorPromise, idx) => {
             try {
+                const singleVendorResponseStartTime = new Date().getTime();
                 singleVendorPromise.then((vendorData) => {
                     if (thresholdAPILatencyReached) {
                         console.log("-> Kill promise ", vendorData[0].airlinesName);
                         return reject(new Error('** Server timeout at Query level'));
                     }
-                    console.log("-> Single Vendor Response from: ", vendorData[0].airlinesName + ` @${new Date().toLocaleTimeString()}` + " || latency " + vendorData[0].airlineAPILatency + "ms");
+                    const singleVendorResponseEndTime = new Date().getTime();
+                    const singleVendorLatency = singleVendorResponseEndTime - singleVendorResponseStartTime;
+                    console.log("-> Response from: ", vendorData[0].airlinesName + ` @${new Date().toLocaleTimeString()}` + " || Latency " + singleVendorLatency + "ms");
                     vendorResponseBoolArr[idx] = true;
                     // DOCS: STEP 3: Flatten the array coming from all vendors within threshold latency
                     flattenedVendorsFlightData.push(...vendorData)
@@ -94,11 +96,11 @@ const getVendors = async (req, res, next) => {
  * @param {*} { vendorName, vendorLatency } 
  * @returns {Promise}
  */
-const getSingleVendorFlights = async ({ vendorName, vendorLatency }) => {
+const getSingleVendorFlights = async (vendorName, vendorLatency) => {
     console.log(`Invoked getSingleVendorFlights: ${vendorName}`);
     return new Promise((resolve, reject) => setTimeout(() => {
         resolve(vendorsDB.filter(vendor => vendor.vendorName === vendorName)[0].flightsArr)
     }, vendorLatency));
 }
 
-module.exports = { getVendors }
+module.exports = { getAllFlightsFromVendors }

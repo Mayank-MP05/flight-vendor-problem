@@ -1,5 +1,5 @@
 const express = require('express')
-const { getVendors } = require('./controllers/vendor.controller')
+const { getAllFlightsFromVendors } = require('./controllers/vendor.controller')
 const app = express()
 const PORT = 5000
 
@@ -7,7 +7,7 @@ app.get('/', (req, res) => {
     res.send('Hello Boiii, Welcome to Flights World!')
 })
 
-app.get('/get-flights', getVendors)
+app.get('/get-flights', getAllFlightsFromVendors)
 
 
 app.listen(PORT, () => {
