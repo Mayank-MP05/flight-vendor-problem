@@ -3,7 +3,9 @@ const { getRandomInt } = require("../utils");
 const { printVendorWiseLatency, printLine } = require("../utils/print-vendor-wise-latency");
 
 const getVendors = async (req, res, next) => {
-    const thresholdAPILatency = 100;
+    const thresholdAPILatency = 500;
+    let thresholdAPILatencyReached = false;
+    console.log('***************************************************')
     console.log("GET /get-flights @", new Date().toLocaleTimeString());
 
     console.log(`- Threshold API Latency : ${thresholdAPILatency}ms`)
@@ -17,12 +19,10 @@ const getVendors = async (req, res, next) => {
 
         // DOCS: STEP 1: Prepare Vendor API Promises to fetch data from all vendors only execute if latency is less than threshold
         let getVendorsFlightsPromisesArr = vendorsDB.map(singleVendor => {
-            if (singleVendor.vendorLatency < thresholdAPILatency) {
-                return getSingleVendorFlights({
-                    vendorName: singleVendor.vendorName,
-                    vendorLatency: singleVendor.vendorLatency
-                })
-            }
+            return getSingleVendorFlights({
+                vendorName: singleVendor.vendorName,
+                vendorLatency: singleVendor.vendorLatency
+            })
         })
         printLine();
 
@@ -35,10 +35,32 @@ const getVendors = async (req, res, next) => {
 
         const flattenedVendorsFlightData = []
 
-        fetchVendorsDataPromiseExecutors({ getVendorsFlightsPromisesArr, flattenedVendorsFlightData });
+        // DOCS: STEP 2: Execute all promises in parallel
+        /**
+         * @description: This is the main logic to execute all promises in parallel and wait for threshold latency
+         */
+        getVendorsFlightsPromisesArr.forEach((singleVendorPromise, idx) => {
+            try {
+                singleVendorPromise.then((vendorData) => {
+                    if (thresholdAPILatencyReached) {
+                        console.log("-> Kill promise ", vendorData[0].airlinesName);
+                        return reject(new Error('** Server timeout at Query level'));
+                    }
+                    console.log("-> Single Vendor Response from: ", vendorData[0].airlinesName + ` @${new Date().toLocaleTimeString()}` + " with latency " + vendorData[0].airlineAPILatency + "ms");
+                    vendorResponseBoolArr[idx] = true;
+                    // DOCS: STEP 3: Flatten the array coming from all vendors within threshold latency
+                    flattenedVendorsFlightData.push(...vendorData)
+                }).catch((error) => {
+                    // console.log("vendorsFlightData PROMISE ERROR: ", error);
+                })
+            } catch (error) {
+                console.log("vendorsFlightData PROMISE ERROR: ", error);
+            }
+        })
 
-        // DOCS: STEP 3: Flatten the array coming from all vendors within threshold latency
         setTimeout(() => {
+            thresholdAPILatencyReached = true;
+
             // DOCS: STEP 4: Sort the outputs based on price and return
             flattenedVendorsFlightData.sort((flightOne, flightTwo) => {
                 return flightOne.flightPrice - flightTwo.flightPrice
@@ -47,9 +69,12 @@ const getVendors = async (req, res, next) => {
             // DOCS: STEP 5: Print total time taken by the API
             const endTimer = new Date().getTime();
             const timeTaken = endTimer - startTimer;
-            console.log("Net API Response Time : ", timeTaken);
-            console.log(`** Response sent to Client`)
             printLine();
+
+            console.log(`Net API Response Time : ${timeTaken}ms`);
+            console.log(`** Response sent to Client`)
+            console.log('***************************************************')
+
 
             // DOCS: STEP 6: Return the sorted data
             res.status(200).json({ vendors: flattenedVendorsFlightData })
@@ -69,27 +94,6 @@ const getSingleVendorFlights = async ({ vendorName, vendorLatency }) => {
     return new Promise((resolve, reject) => setTimeout(() => {
         resolve(vendorsDB.filter(vendor => vendor.vendorName === vendorName)[0].flightsArr)
     }, vendorLatency));
-}
-
-/**
- * @description: Execute all promises in parallel
- */
-const fetchVendorsDataPromiseExecutors = ({ getVendorsFlightsPromisesArr, flattenedVendorsFlightData }) => {
-    // DOCS: STEP 2: Execute all promises in parallel
-    // console.log(`vendorResponseBoolArr @${i}s: `, vendorResponseBoolArr);
-    getVendorsFlightsPromisesArr.forEach((singleVendorPromise, idx) => {
-        try {
-            singleVendorPromise.then((vendorData) => {
-                console.log("-> Single Vendor Response from: ", vendorData[0].airlinesName + " @" + new Date().toLocaleTimeString() + " with latency " + vendorData[0].airlineAPILatency + "ms");
-                vendorResponseBoolArr[idx] = true;
-                flattenedVendorsFlightData.push(...vendorData)
-            }).catch((error) => {
-                // console.log("vendorsFlightData PROMISE ERROR: ", error);
-            })
-        } catch (error) {
-            console.log("vendorsFlightData PROMISE ERROR: ", error);
-        }
-    })
 }
 
 module.exports = { getVendors }
