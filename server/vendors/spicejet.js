@@ -5,7 +5,7 @@ const SPICEJET_FLIGHTS = [
     },
     {
         type: 'ECONOMY',
-        flightPrice: 3700,
+        flightPrice: 3900,
     },
     {
         type: 'BUSINESS',

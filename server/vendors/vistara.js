@@ -1,7 +1,7 @@
 const VISTARA_FLIGHTS = [
     {
         type: 'ECONOMY',
-        flightPrice: 4000,
+        flightPrice: 4100,
     },
     {
         type: 'ECONOMY',
@@ -13,7 +13,7 @@ const VISTARA_FLIGHTS = [
     },
     {
         type: 'BUSINESS',
-        flightPrice: 26000,
+        flightPrice: 26500,
     }, {
         type: 'BUSINESS',
         flightPrice: 87000,

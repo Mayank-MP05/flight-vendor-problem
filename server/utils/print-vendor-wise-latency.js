@@ -1,5 +1,5 @@
 const printVendorWiseLatency = (vendorDB) => {
-    console.log('Vendors latency log: ');
+    console.log('Vendors Database latency log: ');
     for (let vendor of vendorDB) {
         console.log(`${vendor.vendorName} : ${vendor.vendorLatency}ms`);
     }

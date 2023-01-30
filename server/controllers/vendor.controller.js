@@ -4,7 +4,7 @@ const { printVendorWiseLatency, printLine, printNewRequest } = require("../utils
 const { randomizeVendorLatency } = require("../utils/randomize-latency");
 
 const getAllFlightsFromVendors = async (req, res, next) => {
-    const thresholdAPILatency = 500;
+    const thresholdAPILatency = 300;
     let thresholdAPILatencyReached = false;
     printNewRequest();
     console.log("GET /get-flights @", new Date().toLocaleTimeString());
@@ -12,7 +12,7 @@ const getAllFlightsFromVendors = async (req, res, next) => {
     console.log(`- Threshold API Latency : ${thresholdAPILatency}ms`)
     const startTimer = new Date().getTime();
 
-    console.log("[INFO] Randomize DB latency ...");
+    console.log("[INFO] Randomize DB latency done ...");
     // DOCS: STEP 0: Prepare DB with random latency and booking links
     vendorsDB = vendorsDB.map(vendor => transformVendorObjAndFlights(vendor))
     vendorsDB = randomizeVendorLatency(vendorsDB);
@@ -33,8 +33,6 @@ const getAllFlightsFromVendors = async (req, res, next) => {
         })
         printLine();
 
-        const vendorResponseBoolArr = getVendorsFlightsPromisesArr.map(singleVendor => false)
-
         // const vendorsFlightData = await Promise.all(getVendorsFlightsPromisesArr)
 
         const flattenedVendorsFlightData = []
@@ -53,12 +51,12 @@ const getAllFlightsFromVendors = async (req, res, next) => {
                     }
                     const singleVendorResponseEndTime = new Date().getTime();
                     const singleVendorLatency = singleVendorResponseEndTime - singleVendorResponseStartTime;
-                    console.log("-> Response from: ", vendorData[0].airlinesName + ` @${new Date().toLocaleTimeString()}` + " || Latency " + singleVendorLatency + "ms");
-                    vendorResponseBoolArr[idx] = true;
+                    console.log("-> Response from: ", vendorData[0].airlinesName + ` @${new Date().toLocaleTimeString()}` + " || Network Latency " + singleVendorLatency + "ms");
                     // DOCS: STEP 3: Flatten the array coming from all vendors within threshold latency
                     flattenedVendorsFlightData.push(...vendorData)
                 }).catch((error) => {
                     // console.log("vendorsFlightData PROMISE ERROR: ", error);
+                }).finally(() => {
                 })
             } catch (error) {
                 console.log("vendorsFlightData PROMISE ERROR: ", error);
