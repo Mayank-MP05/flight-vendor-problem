@@ -2,6 +2,7 @@
 
 Get the list of leads sort based on the price sorting
 
+## Flights Vendor Problem 
 ### Inputs:
 
 1. Get Flights API response time
@@ -12,4 +13,4 @@ Get the list of leads sort based on the price sorting
 
 ### Outputs
 
-1. Get the list of flights sorted based on pricing
+1. Get the list of flights sorted based on pricing and API delay
