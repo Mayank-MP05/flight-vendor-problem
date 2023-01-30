@@ -50,6 +50,6 @@ const getRandomInt = (min, max) => {
 module.exports = {
     sleep,
     timeout,
-    insertVendorNameInFlightsObj: transformVendorObjAndFlights,
+    transformVendorObjAndFlights,
     getRandomInt
 }

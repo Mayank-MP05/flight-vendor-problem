@@ -4,7 +4,7 @@ const { AIR_INDIA_FLIGHTS } = require("../vendors/air-india")
 const { GO_FIRST_FLIGHTS } = require("../vendors/go-first")
 const { SPICEJET_FLIGHTS } = require("../vendors/spicejet")
 const { VISTARA_FLIGHTS } = require("../vendors/vistara")
-const { sleep, insertVendorNameInFlightsObj } = require("../utils")
+const { sleep, transformVendorObjAndFlights } = require("../utils")
 
 let vendorsDB = [
     {
@@ -32,6 +32,5 @@ let vendorsDB = [
         flightsArr: VISTARA_FLIGHTS
     }
 ]
-vendorsDB = vendorsDB.map(vendor => insertVendorNameInFlightsObj(vendor))
-console.log("vendorsDB: ", vendorsDB);
+vendorsDB = vendorsDB.map(vendor => transformVendorObjAndFlights(vendor))
 module.exports = vendorsDB
